@@ -322,4 +322,14 @@ public class ViewerBinaryTypeHandlerManager implements PersistenceTypeHandlerMan
 		return this;
 	}
 
+	@Override
+	public <T> PersistenceLegacyTypeHandler<Binary, ? super T> ensureLegacyTypeHandler
+	(
+			PersistenceTypeDefinition legacyTypeDefinition,
+			PersistenceTypeHandler<Binary, ? super T> currentTypeHandler
+	) 
+	{
+		throw new UnsupportedOperationException();
+	}
+
 }

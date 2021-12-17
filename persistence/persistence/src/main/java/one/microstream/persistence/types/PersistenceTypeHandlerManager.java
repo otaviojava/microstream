@@ -32,6 +32,7 @@ import one.microstream.collections.types.XAddingEnum;
 import one.microstream.collections.types.XGettingCollection;
 import one.microstream.collections.types.XGettingEnum;
 import one.microstream.equality.Equalator;
+import one.microstream.meta.XDebug;
 import one.microstream.persistence.exceptions.PersistenceException;
 import one.microstream.persistence.exceptions.PersistenceExceptionConsistency;
 import one.microstream.persistence.exceptions.PersistenceExceptionTypeConsistency;
@@ -57,6 +58,12 @@ public interface PersistenceTypeHandlerManager<D> extends PersistenceTypeManager
 	public <T> PersistenceTypeHandler<D, ? super T> ensureTypeHandler(Class<T> type);
 	
 	public <T> PersistenceTypeHandler<D, ? super T> ensureTypeHandler(PersistenceTypeDefinition typeDefinition);
+	
+	public <T> PersistenceLegacyTypeHandler<D, ? super T> ensureLegacyTypeHandler
+	(
+		final PersistenceTypeDefinition    legacyTypeDefinition,
+		final PersistenceTypeHandler<D, ? super T> currentTypeHandler
+	);
 	
 	public void ensureTypeHandlers(XGettingEnum<PersistenceTypeDefinition> typeDefinitions);
 
@@ -447,16 +454,19 @@ public interface PersistenceTypeHandlerManager<D> extends PersistenceTypeManager
 			return this.ensureLegacyTypeHandler(typeDefinition, runtimeTypeHandler);
 		}
 		
-		private <T> PersistenceLegacyTypeHandler<D, T> ensureLegacyTypeHandler(
+		@Override
+		public <T> PersistenceLegacyTypeHandler<D, ? super T> ensureLegacyTypeHandler(
 			final PersistenceTypeDefinition    legacyTypeDefinition,
-			final PersistenceTypeHandler<D, T> currentTypeHandler
+			final PersistenceTypeHandler<D, ? super T> currentTypeHandler
 		)
 		{
-			final PersistenceLegacyTypeHandler<D, T> legacyTypeHandler = this.legacyTypeMapper.ensureLegacyTypeHandler(
+			final PersistenceLegacyTypeHandler<D, ? super T> legacyTypeHandler = this.legacyTypeMapper.ensureLegacyTypeHandler(
 				legacyTypeDefinition,
 				currentTypeHandler
 			);
 			this.registerLegacyTypeHandler(legacyTypeHandler);
+			
+			XDebug.println("registered legacy type handler for " + legacyTypeHandler.typeName() + " " + legacyTypeHandler.typeId());
 			
 			return legacyTypeHandler;
 		}
