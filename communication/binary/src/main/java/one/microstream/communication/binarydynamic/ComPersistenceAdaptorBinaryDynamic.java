@@ -250,9 +250,26 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 		final ComConnection connection,
 		final ComProtocol protocol,
 		final ComHost<ComConnection> parent)
-	{
-		final PersistenceManager<?> pm = this.provideHostPersistenceManager(connection);
-		return new ComHostChannelDynamic<>(pm, connection, protocol, parent);
+	{	
+		final PersistenceFoundation<?, ?>                hf  = this.hostConnectionFoundation(connection);
+		final PersistenceManager<?>                      pm  = hf.createPersistenceManager();
+		@SuppressWarnings("unchecked")
+		final PersistenceTypeHandlerManager<Binary>      thm = (PersistenceTypeHandlerManager<Binary>) hf.getTypeHandlerManager();
+		
+		final ComTypeDefinitionBuilder typeDefinitionBuilder = new ComTypeDefinitionBuilder(
+			hf.getTypeDictionaryParser(),
+			hf.getTypeDefinitionCreator(),
+			hf.getTypeDescriptionResolverProvider());
+				
+		return new ComHostChannelDynamic<>
+		(
+			pm, 
+			connection, 
+			protocol,
+			parent,
+			thm,
+			typeDefinitionBuilder,
+			this.foundation.getTypeHandlerEnsurer());
 	}
 	
 	@Override
@@ -280,8 +297,7 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 			parent,
 			thm,
 			typeDefinitionBuilder,
-			this.foundation.getTypeHandlerEnsurer());
-		
+			this.foundation.getTypeHandlerEnsurer());		
 	}
 	
 

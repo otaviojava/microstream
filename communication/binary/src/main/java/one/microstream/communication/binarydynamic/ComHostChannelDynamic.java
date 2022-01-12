@@ -3,7 +3,10 @@ package one.microstream.communication.binarydynamic;
 import one.microstream.communication.types.ComHost;
 import one.microstream.communication.types.ComHostChannel;
 import one.microstream.communication.types.ComProtocol;
+import one.microstream.persistence.binary.types.Binary;
 import one.microstream.persistence.types.PersistenceManager;
+import one.microstream.persistence.types.PersistenceTypeHandlerEnsurer;
+import one.microstream.persistence.types.PersistenceTypeHandlerManager;
 
 public class ComHostChannelDynamic<C>
 	extends ComChannelDynamic<C>
@@ -23,14 +26,17 @@ public class ComHostChannelDynamic<C>
 		final PersistenceManager<?> persistenceManager,
 		final C connection,
 		final ComProtocol protocol,
-		final ComHost<C> parent)
+		final ComHost<C> parent, 
+		final PersistenceTypeHandlerManager<Binary> typeHandlerManager, 
+		final ComTypeDefinitionBuilder typeDefintionBuilder, 
+		final PersistenceTypeHandlerEnsurer<Binary> typeHandlerEnsurer)
 	{
 		super(persistenceManager, connection, protocol);
 		this.parent = parent;
 		
 		final ComTypeDescriptionRegistrationObserver observer = new ComTypeDescriptionRegistrationObserver(this);
 		this.persistenceManager.typeDictionary().setTypeDescriptionRegistrationObserver(observer);
-		this.initalizeHandlersInternal();
+		this.initalizeHandlersInternal(typeHandlerManager, typeDefintionBuilder, typeHandlerEnsurer);
 		
 	}
 
@@ -39,12 +45,18 @@ public class ComHostChannelDynamic<C>
 	// methods //
 	////////////
 	
-	private void initalizeHandlersInternal()
+	private void initalizeHandlersInternal(
+		final PersistenceTypeHandlerManager<Binary> typeHandlerManager,
+		final ComTypeDefinitionBuilder typeDefintionBuilder, final PersistenceTypeHandlerEnsurer<Binary> typeHandlerEnsurer)			
 	{
 		this.handlers.registerSendHandler(
 			ComMessageNewType.class,
 			new ComHandlerSendMessageNewType(
-				this));
+				this,
+				typeHandlerManager,
+				typeDefintionBuilder,
+				typeHandlerEnsurer
+		));
 		
 		this.handlers.registerReceiveHandler(
 			ComMessageClientTypeMismatch.class,

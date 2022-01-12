@@ -11,7 +11,7 @@ public class ComMessageNewType implements ComMessage
 	////////////////////
 	
 	private String typeEntry;
-	
+	private transient PersistenceTypeDefinition typeDefinition;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// constructors //
@@ -19,6 +19,7 @@ public class ComMessageNewType implements ComMessage
 	
 	public ComMessageNewType(final PersistenceTypeDefinition typeDefinition)
 	{
+		this.typeDefinition = typeDefinition;
 		this.typeEntry = "";
 		final PersistenceTypeDictionaryAssembler assembler = PersistenceTypeDictionaryAssembler.New();
 		
@@ -36,4 +37,12 @@ public class ComMessageNewType implements ComMessage
 	{
 		return this.typeEntry;
 	}
+
+
+	public PersistenceTypeDefinition typeDefinition() 
+	{
+		return this.typeDefinition;
+	}
+	
+	
 }

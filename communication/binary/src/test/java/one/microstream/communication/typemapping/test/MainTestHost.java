@@ -20,6 +20,8 @@ public class MainTestHost {
 				
 				
 				XDebug.println("HOST RECEIVED: " + o.toString());
+				
+				hostChannel.send("Goodby");
 			})
 			.setInactivityTimeout(000)
 			.createHost()
