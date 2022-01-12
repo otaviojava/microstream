@@ -78,7 +78,15 @@ public class ComHandlerReceiveMessageNewType implements ComHandlerReceive<ComMes
 				else
 				{
 					this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
-					throw new ComExceptionTypeMismatch(ptd.typeId(), ptd.type().getName());
+					this.typeHandlerManager.ensureLegacyTypeHandler(ptd, th);
+					this.typeHandlerManager.ensureTypeHandler(ptd.type());
+													
+					final ComMessageStatus answer = (ComMessageStatus)this.comChannel.requestUnhandled(new ComMessageNewType(this.typeHandlerManager.lookupTypeHandler(ptd.type())));
+					
+					if(answer.status() != true) 
+					{
+						throw new ComExceptionTypeMismatch(ptd.typeId(), ptd.type().getName());
+					}
 				}
 							
 			}
