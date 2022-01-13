@@ -69,26 +69,32 @@ public class ComHandlerReceiveMessageNewType implements ComHandlerReceive<ComMes
 								
 			for (final PersistenceTypeDefinition ptd : defs)
 			{
-				final PersistenceTypeHandler<Binary, ?> th = this.typeHandlerEnsurer.ensureTypeHandler(ptd.type());
-								
-				if(PersistenceTypeDescriptionMember.equalMembers(ptd.allMembers(), th.allMembers(), this.memberValidator))
+				if(ptd.type() != null)
 				{
-					this.typeHandlerManager.ensureTypeHandler(ptd.type());
+					final PersistenceTypeHandler<Binary, ?> th = this.typeHandlerEnsurer.ensureTypeHandler(ptd.type());
+									
+					if(PersistenceTypeDescriptionMember.equalMembers(ptd.allMembers(), th.allMembers(), this.memberValidator))
+					{
+						this.typeHandlerManager.ensureTypeHandler(ptd.type());
+					}
+					else
+					{
+						this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
+						this.typeHandlerManager.ensureLegacyTypeHandler(ptd, th);
+						this.typeHandlerManager.ensureTypeHandler(ptd.type());
+														
+						final ComMessageStatus answer = (ComMessageStatus)this.comChannel.requestUnhandled(new ComMessageNewType(this.typeHandlerManager.lookupTypeHandler(ptd.type())));
+						
+						if(answer.status() != true) 
+						{
+							throw new ComExceptionTypeMismatch(ptd.typeId(), ptd.type().getName());
+						}
+					}
 				}
 				else
 				{
-					this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
-					this.typeHandlerManager.ensureLegacyTypeHandler(ptd, th);
-					this.typeHandlerManager.ensureTypeHandler(ptd.type());
-													
-					final ComMessageStatus answer = (ComMessageStatus)this.comChannel.requestUnhandled(new ComMessageNewType(this.typeHandlerManager.lookupTypeHandler(ptd.type())));
-					
-					if(answer.status() != true) 
-					{
-						throw new ComExceptionTypeMismatch(ptd.typeId(), ptd.type().getName());
-					}
+					throw new ComExceptionRemoteClassNotFound(ptd.typeName());
 				}
-							
 			}
 												
 		}
