@@ -19,6 +19,7 @@ import one.microstream.communication.types.ComPersistenceAdaptorCreator;
 import one.microstream.communication.types.ComProtocol;
 import one.microstream.persistence.binary.types.Binary;
 import one.microstream.persistence.binary.types.BinaryPersistenceFoundation;
+import one.microstream.persistence.internal.PrintingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.Persistence;
 import one.microstream.persistence.types.PersistenceContextDispatcher;
 import one.microstream.persistence.types.PersistenceFoundation;
@@ -146,7 +147,9 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 			)
 			.setRootsProvider(
 				new ComBinaryPersistenceRootsProvider()
-			);
+			)
+			.setLegacyTypeMappingResultor(PrintingLegacyTypeMappingResultor.New(initFoundation.getLegacyTypeMappingResultor()))
+			;
 			
 		
 		return initFoundation;

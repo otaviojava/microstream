@@ -121,7 +121,8 @@ public class ComHandlerSendMessageNewType implements ComHandlerSend<ComMessageNe
 				{				
 					@SuppressWarnings("unchecked")
 					final PersistenceTypeHandler<Binary, ?> current = (PersistenceTypeHandler<Binary, ?>) persistenceTypeDefinition;				
-					this.typeHandlerManager.ensureLegacyTypeHandler(ptd, current);															
+					this.typeHandlerManager.ensureLegacyTypeHandler(ptd, current);		
+					this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
 				}
 				
 				System.out.println("typehandlers created");
