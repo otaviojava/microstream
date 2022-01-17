@@ -26,6 +26,7 @@ import one.microstream.persistence.types.PersistenceFoundation;
 import one.microstream.persistence.types.PersistenceIdStrategy;
 import one.microstream.persistence.types.PersistenceManager;
 import one.microstream.persistence.types.PersistenceSizedArrayLengthController;
+import one.microstream.persistence.types.PersistenceTypeDefinition;
 import one.microstream.persistence.types.PersistenceTypeDictionary;
 import one.microstream.persistence.types.PersistenceTypeDictionaryLoader;
 import one.microstream.persistence.types.PersistenceTypeDictionaryManager;
@@ -33,6 +34,7 @@ import one.microstream.persistence.types.PersistenceTypeDictionaryStorer;
 import one.microstream.persistence.types.PersistenceTypeDictionaryView;
 import one.microstream.persistence.types.PersistenceTypeHandlerManager;
 import one.microstream.persistence.types.PersistenceWriteController;
+import one.microstream.typing.KeyValue;
 import one.microstream.util.BufferSizeProvider;
 
 public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor<ComConnection>
@@ -230,10 +232,11 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 		typeDictionaryView.allTypeDefinitions().forEach(d -> typeDictionaryManager.registerTypeDefinition(d.value()));
 				
 		clientFoundation.setTypeDictionaryManager(typeDictionaryManager);
-		clientFoundation.setTypeMismatchValidator(Persistence.typeMismatchValidatorFailing());
 		
 		final PersistenceTypeHandlerManager<Binary> typeHandlerManager = clientFoundation.getTypeHandlerManager();
 		typeHandlerManager.initialize();
+		
+		this.ensureTypeHandlers(typeHandlerManager, protocol);
 		
 		final ComPersistenceChannelBinary.Default channel = ComPersistenceChannelBinary.New(
 				connection,
@@ -247,6 +250,13 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 		return clientFoundation;
 	}
 
+
+	private void ensureTypeHandlers(final PersistenceTypeHandlerManager<Binary> typeHandlerManager, final ComProtocol protocol) 
+	{		
+		for (final KeyValue<Long, PersistenceTypeDefinition> entry : protocol.typeDictionary().allTypeDefinitions()) {
+			typeHandlerManager.ensureTypeHandler(entry.value());
+		}
+	}
 
 	@Override
 	public ComHostChannel<ComConnection> createHostChannel(
@@ -264,7 +274,7 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 			hf.getTypeDefinitionCreator(),
 			hf.getTypeDescriptionResolverProvider());
 				
-		return new ComHostChannelDynamic<>
+		final ComHostChannelDynamic<ComConnection> channel = new ComHostChannelDynamic<>
 		(
 			pm, 
 			connection, 
@@ -273,6 +283,19 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 			thm,
 			typeDefinitionBuilder,
 			this.foundation.getTypeHandlerEnsurer());
+		
+		final ComTypeMappingResolver tmr = new ComTypeMappingResolver
+		(
+			hf.getTypeDictionaryAssembler(),
+			connection,
+			protocol.typeDictionary(),
+			thm,
+			typeDefinitionBuilder
+		);
+				
+		tmr.resolveHost();
+		
+		return channel; 
 	}
 	
 	@Override
@@ -292,8 +315,7 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 		
 		final PersistenceManager<?> pm = clientFoundation.createPersistenceManager();
 	
-		
-		return new ComClientChannelDynamic<>(
+		final ComClientChannelDynamic<ComConnection> channel = new ComClientChannelDynamic<>(
 			pm,
 			connection,
 			protocol,
@@ -301,6 +323,20 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 			thm,
 			typeDefinitionBuilder,
 			this.foundation.getTypeHandlerEnsurer());		
+		
+		final ComTypeMappingResolver tmr = new ComTypeMappingResolver
+		(
+			clientFoundation.getTypeDictionaryAssembler(),
+			connection,
+			protocol.typeDictionary(),
+			thm,
+			typeDefinitionBuilder
+		);
+		
+		tmr.resolveClient();
+		
+		
+		return channel;
 	}
 	
 
