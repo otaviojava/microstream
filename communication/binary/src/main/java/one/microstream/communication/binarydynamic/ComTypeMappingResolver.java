@@ -175,7 +175,8 @@ public class ComTypeMappingResolver
 	{
 		typeDefinitions.forEach( typeDefinition -> {		
 			final PersistenceTypeHandler<Binary, ?> currentHandler = this.typeHandlerManager.lookupTypeHandler(typeDefinition.type());	
-			this.typeHandlerManager.ensureLegacyTypeHandler(typeDefinition, currentHandler);			
+			this.typeHandlerManager.ensureLegacyTypeHandler(typeDefinition, currentHandler);	
+			this.typeHandlerManager.updateCurrentHighestTypeId(typeDefinition.typeId());
 		});
 	}
 }
