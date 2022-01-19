@@ -113,7 +113,8 @@ public class ComTypeMappingResolver
 		
 		vs
 		.reset()
-		.repeat(LENGTH_CHAR_COUNT, '0');
+		.repeat(LENGTH_CHAR_COUNT, '0')
+		.add(String.format("%08d", newDefinitions.intSize()));
 		
 		newDefinitions.forEach(definition -> {
 			vs.add(this.assembleTypeDefintion(definition));
@@ -149,11 +150,16 @@ public class ComTypeMappingResolver
 	
 	private XGettingSequence<PersistenceTypeDefinition> parseClientTypeDefinitions(final ByteBuffer buffer) 
 	{
-		buffer.position(1);
-		final char[] typeDefinitionsChars = XChars.standardCharset().decode(buffer).array();
+		if(buffer != null) 
+		{
+			buffer.position(1);
+			final char[] typeDefinitionsChars = XChars.standardCharset().decode(buffer).array();
 		
-		final String typeDefintions = XChars.String(typeDefinitionsChars);
-		return this.typeDefinitionBuilder.buildTypeDefinitions(typeDefintions);	
+			final String typeDefintions = XChars.String(typeDefinitionsChars);
+			return this.typeDefinitionBuilder.buildTypeDefinitions(typeDefintions);
+		}
+		
+		return BulkList.New();
 	}
 
 	private ByteBuffer receiveUpdatedDefintionsfromClient() 
@@ -165,18 +171,31 @@ public class ComTypeMappingResolver
 		final String lengthDigits = XChars.standardCharset().decode(lengthBuffer).toString();
 		final int    length       = Integer.parseInt(lengthDigits);
 		
-		final ByteBuffer typeDefinitionsBuffer = XMemory.allocateDirectNative(length - LENGTH_CHAR_COUNT);
-		this.connection.read(typeDefinitionsBuffer, length - LENGTH_CHAR_COUNT);
+		final ByteBuffer countBuffer = XMemory.allocateDirectNative(LENGTH_CHAR_COUNT);
+		this.connection.read(countBuffer, LENGTH_CHAR_COUNT);
+		countBuffer.position(0);
+		final String countDigits = XChars.standardCharset().decode(countBuffer).toString();
+		final int    count       = Integer.parseInt(countDigits);
 		
-		return typeDefinitionsBuffer;
+		if(count > 0 ) 
+		{
+			final ByteBuffer typeDefinitionsBuffer = XMemory.allocateDirectNative(length - LENGTH_CHAR_COUNT - LENGTH_CHAR_COUNT);
+			this.connection.read(typeDefinitionsBuffer, length - LENGTH_CHAR_COUNT - LENGTH_CHAR_COUNT);			
+			return typeDefinitionsBuffer;
+		}
+		
+		return null;
 	}
 	
 	private void applyHostTypeMapping(final XGettingSequence<PersistenceTypeDefinition> typeDefinitions)
 	{
-		typeDefinitions.forEach( typeDefinition -> {		
-			final PersistenceTypeHandler<Binary, ?> currentHandler = this.typeHandlerManager.lookupTypeHandler(typeDefinition.type());	
-			this.typeHandlerManager.ensureLegacyTypeHandler(typeDefinition, currentHandler);	
-			this.typeHandlerManager.updateCurrentHighestTypeId(typeDefinition.typeId());
-		});
+		if(typeDefinitions != null)
+		{
+			typeDefinitions.forEach( typeDefinition -> {		
+				final PersistenceTypeHandler<Binary, ?> currentHandler = this.typeHandlerManager.lookupTypeHandler(typeDefinition.type());	
+				this.typeHandlerManager.ensureLegacyTypeHandler(typeDefinition, currentHandler);	
+				this.typeHandlerManager.updateCurrentHighestTypeId(typeDefinition.typeId());
+			});
+		}
 	}
 }
