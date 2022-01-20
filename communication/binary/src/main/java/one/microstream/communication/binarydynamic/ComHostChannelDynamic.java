@@ -49,14 +49,18 @@ public class ComHostChannelDynamic<C>
 		final PersistenceTypeHandlerManager<Binary> typeHandlerManager,
 		final ComTypeDefinitionBuilder typeDefintionBuilder, final PersistenceTypeHandlerEnsurer<Binary> typeHandlerEnsurer)			
 	{
-		this.handlers.registerSendHandler(
+		this.handlers.registerReceiveHandler(
 			ComMessageNewType.class,
-			new ComHandlerSendMessageNewType(
+			new ComHandlerReceiveMessageNewType(
 				this,
 				typeHandlerManager,
 				typeDefintionBuilder,
 				typeHandlerEnsurer
-		));
+				));
+		
+		this.handlers.registerSendHandler(
+			ComMessageNewType.class,
+			new ComHandlerSendMessageNewType(this));
 		
 		this.handlers.registerReceiveHandler(
 			ComMessageClientTypeMismatch.class,

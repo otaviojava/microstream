@@ -35,6 +35,9 @@ public class ComClientChannelDynamic<C>
 	{
 		super(persistenceManager, connection, protocol);
 		this.parent = parent;
+		
+		final ComTypeDescriptionRegistrationObserver observer = new ComTypeDescriptionRegistrationObserver(this);
+		this.persistenceManager.typeDictionary().setTypeDescriptionRegistrationObserver(observer);
 		this.initalizeHandlersInternal(typeHandlerManager, typeDefintionBuilder, typeHandlerEnsurer);
 	}
 
@@ -55,6 +58,10 @@ public class ComClientChannelDynamic<C>
 				typeDefintionBuilder,
 				typeHandlerEnsurer
 				));
+		
+		this.handlers.registerSendHandler(
+			ComMessageNewType.class,
+			new ComHandlerSendMessageNewType(this));
 		
 		this.handlers.registerReceiveHandler(
 			ComMessageData.class,

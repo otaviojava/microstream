@@ -62,7 +62,7 @@ public class ComHandlerReceiveMessageNewType implements ComHandlerReceive<ComMes
 	public Object processMessage(final ComMessageNewType message)
 	{
 		final String typeEntry = message.typeEntry();
-		
+
 		try
 		{
 			final XGettingSequence<PersistenceTypeDefinition> defs = this.typeDefintionBuilder.buildTypeDefinitions(typeEntry);
@@ -80,15 +80,7 @@ public class ComHandlerReceiveMessageNewType implements ComHandlerReceive<ComMes
 					else
 					{
 						this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
-						this.typeHandlerManager.ensureLegacyTypeHandler(ptd, th);
-						this.typeHandlerManager.ensureTypeHandler(ptd.type());
-														
-						final ComMessageStatus answer = (ComMessageStatus)this.comChannel.requestUnhandled(new ComMessageNewType(this.typeHandlerManager.lookupTypeHandler(ptd.type())));
-						
-						if(answer.status() != true) 
-						{
-							throw new ComExceptionTypeMismatch(ptd.typeId(), ptd.type().getName());
-						}
+						this.typeHandlerManager.ensureLegacyTypeHandler(ptd, th);																							
 					}
 				}
 				else
@@ -98,9 +90,9 @@ public class ComHandlerReceiveMessageNewType implements ComHandlerReceive<ComMes
 			}
 												
 		}
-		catch(final ComExceptionTypeMismatch e)
+		catch(final Exception e)
 		{
-			this.comChannel.send(new ComMessageClientTypeMismatch(e.getTypeId(), e.getType()));
+			new ComMessageStatus(false);
 			throw e;
 		}
 		
