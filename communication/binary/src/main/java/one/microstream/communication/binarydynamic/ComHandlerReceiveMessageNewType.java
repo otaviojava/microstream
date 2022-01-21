@@ -2,6 +2,7 @@ package one.microstream.communication.binarydynamic;
 
 import one.microstream.collections.types.XGettingSequence;
 import one.microstream.equality.Equalator;
+import one.microstream.meta.XDebug;
 import one.microstream.persistence.binary.types.Binary;
 import one.microstream.persistence.types.PersistenceTypeDefinition;
 import one.microstream.persistence.types.PersistenceTypeDescriptionMember;
@@ -59,45 +60,52 @@ public class ComHandlerReceiveMessageNewType implements ComHandlerReceive<ComMes
 	};
 	
 	@Override
-	public Object processMessage(final ComMessageNewType message)
+	public Void processMessage(final ComMessageNewType message)
 	{
 		final String typeEntry = message.typeEntry();
-
-		try
+		XDebug.println("new type: " + typeEntry);
+		
+		final XGettingSequence<PersistenceTypeDefinition> defs = this.typeDefintionBuilder.buildTypeDefinitions(typeEntry);
+		for (final PersistenceTypeDefinition ptd : defs)
 		{
-			final XGettingSequence<PersistenceTypeDefinition> defs = this.typeDefintionBuilder.buildTypeDefinitions(typeEntry);
-								
-			for (final PersistenceTypeDefinition ptd : defs)
-			{
-				if(ptd.type() != null)
-				{
+			if(ptd.type() != null) {
+				
+				final PersistenceTypeHandler<Binary, ?> handler = this.typeHandlerManager.lookupTypeHandler(ptd.type());
+				
+				if(handler != null) {
+					//XDebug.println("handler found");
+										
+					if(PersistenceTypeDescriptionMember.equalMembers(ptd.allMembers(), handler.allMembers(), this.memberValidator))
+					{
+						//XDebug.println("Exsiting handler matches");
+					}
+					else
+					{
+						//XDebug.println("Creating legacy handler for exiting");
+						this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
+						this.typeHandlerManager.ensureLegacyTypeHandler(ptd, handler);																							
+					}
+					
+				} else {
+					//XDebug.println("no handler found");
+					
 					final PersistenceTypeHandler<Binary, ?> th = this.typeHandlerEnsurer.ensureTypeHandler(ptd.type());
 									
 					if(PersistenceTypeDescriptionMember.equalMembers(ptd.allMembers(), th.allMembers(), this.memberValidator))
 					{
+						//XDebug.println("Creating new handler for new type");
 						this.typeHandlerManager.ensureTypeHandler(ptd.type());
 					}
 					else
 					{
+						//XDebug.println("Legacy handler for new type");
 						this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
 						this.typeHandlerManager.ensureLegacyTypeHandler(ptd, th);																							
-					}
-				}
-				else
-				{
-					throw new ComExceptionRemoteClassNotFound(ptd.typeName());
-				}
+					}									
+				}								
 			}
-												
 		}
-		catch(final Exception e)
-		{
-			new ComMessageStatus(false);
-			throw e;
-		}
-		
-		this.comChannel.send(new ComMessageStatus(true));
-		
+	
 		return null;
 	}
 	

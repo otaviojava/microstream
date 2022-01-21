@@ -6,7 +6,7 @@ public class ComHandlerSendMessageNewType implements ComHandlerSend<ComMessageNe
 	// instance fields //
 	////////////////////
 	
-	private final ComChannelDynamic<?>                  comChannel;
+	private final ComChannelDynamic<?> comChannel;
 	
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -28,17 +28,8 @@ public class ComHandlerSendMessageNewType implements ComHandlerSend<ComMessageNe
 
 	@Override
 	public Void sendMessage(final ComMessageNewType message)
-	{
-		final ComMessageStatus answer = (ComMessageStatus)this.comChannel.requestUnhandled(message);
-				
-		if(answer instanceof ComMessageClientTypeMismatch)
-		{
-			throw new ComExceptionTypeMismatch(
-				((ComMessageClientTypeMismatch) answer).getTypeId(),
-				((ComMessageClientTypeMismatch) answer).getType()
-			);
-		}
-				
+	{					
+		this.comChannel.persistenceManager.store(message);		
 		return null;
 	}
 
