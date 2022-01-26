@@ -33,6 +33,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import one.microstream.memory.XMemory;
+import one.microstream.meta.XDebug;
 
 public final class XSockets
 {
@@ -47,8 +48,10 @@ public final class XSockets
 	{
 		try
 		{
+			XDebug.println("Trying to open ServerSocketChannel with address: " + address);
 			final ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(address);
+			XDebug.println("Opend ServerSocketChannel with address: " + address);
 			return serverSocketChannel;
 		}
 		catch(final IOException e)
