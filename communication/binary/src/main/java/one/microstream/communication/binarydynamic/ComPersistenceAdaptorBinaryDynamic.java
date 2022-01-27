@@ -17,8 +17,10 @@ import one.microstream.communication.types.ComHostChannel;
 import one.microstream.communication.types.ComPersistenceAdaptor;
 import one.microstream.communication.types.ComPersistenceAdaptorCreator;
 import one.microstream.communication.types.ComProtocol;
+import one.microstream.meta.XDebug;
 import one.microstream.persistence.binary.types.Binary;
 import one.microstream.persistence.binary.types.BinaryPersistenceFoundation;
+import one.microstream.persistence.exceptions.PersistenceException;
 import one.microstream.persistence.internal.PrintingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.Persistence;
 import one.microstream.persistence.types.PersistenceContextDispatcher;
@@ -176,12 +178,14 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 		hostFoundation.setObjectIdProvider     (this.hostIdStrategy().createObjectIdProvider());
 		hostFoundation.setTypeIdProvider       (this.hostIdStrategy().createTypeIdProvider());
 		hostFoundation.setTypeMismatchValidator(Persistence.typeMismatchValidatorFailing());
+				
+		final PersistenceTypeDictionaryManager typeDictionaryManager = PersistenceTypeDictionaryManager.Transient(
+			hostFoundation.getTypeDictionaryCreator());
 		
-		hostFoundation.setTypeDictionaryManager(
-			PersistenceTypeDictionaryManager.Transient(
-				hostFoundation.getTypeDictionaryCreator()
-			)
-		);
+		final PersistenceTypeDictionaryView typeDictionaryView = this.provideTypeDictionary();
+		typeDictionaryView.allTypeDefinitions().forEach(d -> typeDictionaryManager.registerTypeDefinition(d.value()));
+				
+		hostFoundation.setTypeDictionaryManager(typeDictionaryManager);
 			
 		return hostFoundation;
 	}
@@ -192,10 +196,6 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 				
 		final PersistenceTypeHandlerManager<Binary> typeHandlerManager = hostFoundation.getTypeHandlerManager();
 		typeHandlerManager.initialize();
-
-		this.iterateEntityTypes(c ->
-			typeHandlerManager.ensureTypeHandler(c)
-		);
 		
 		final ComPersistenceChannelBinary.Default channel = ComPersistenceChannelBinary.New(
 				connection,
@@ -365,6 +365,21 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 		this.iterateEntityTypes(c ->
 			typeHandlerManager.ensureTypeHandler(c)
 		);
+					
+		typeHandlerManager.iteratePerIds((k,v) -> {
+			XDebug.println("key: " + k + " value: " + v.getName());
+			
+			if(typeHandlerManager.lookupTypeHandler(v) == null)
+			{
+				XDebug.println("additional handler for " + v.getName());
+				try {
+					typeHandlerManager.ensureTypeHandler(v);
+				} catch(final PersistenceException e) {
+					XDebug.println("No handler for " + v.getName() + ": " + e.getMessage());
+				}
+				
+			}
+		});
 		
 		return typeHandlerManager.typeDictionary();
 	}
