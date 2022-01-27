@@ -22,6 +22,7 @@ package one.microstream.persistence.types;
 
 import static one.microstream.X.notNull;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import one.microstream.collections.EqHashTable;
@@ -1197,6 +1198,12 @@ public interface PersistenceTypeHandlerManager<D> extends PersistenceTypeManager
 				// finally add the type descriptions
 				this.typeDictionaryManager.registerTypeDefinitions(typeDictionary.allTypeDefinitions().values());
 			}
+		}
+
+		@Override
+		public void iteratePerIds(final BiConsumer<Long, ? super Class<?>> consumer) 
+		{
+			this.typeHandlerRegistry.iteratePerIds(consumer);			
 		}
 
 	}

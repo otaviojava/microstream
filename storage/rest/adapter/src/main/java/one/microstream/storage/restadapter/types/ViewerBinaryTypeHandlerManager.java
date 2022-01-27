@@ -1,5 +1,7 @@
 package one.microstream.storage.restadapter.types;
 
+import java.util.function.BiConsumer;
+
 /*-
  * #%L
  * microstream-storage-restadapter
@@ -325,11 +327,17 @@ public class ViewerBinaryTypeHandlerManager implements PersistenceTypeHandlerMan
 	@Override
 	public <T> PersistenceLegacyTypeHandler<Binary, ? super T> ensureLegacyTypeHandler
 	(
-			PersistenceTypeDefinition legacyTypeDefinition,
-			PersistenceTypeHandler<Binary, ? super T> currentTypeHandler
+			final PersistenceTypeDefinition legacyTypeDefinition,
+			final PersistenceTypeHandler<Binary, ? super T> currentTypeHandler
 	) 
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void iteratePerIds(final BiConsumer<Long, ? super Class<?>> consumer) 
+	{
+		throw new UnsupportedOperationException();		
 	}
 
 }
