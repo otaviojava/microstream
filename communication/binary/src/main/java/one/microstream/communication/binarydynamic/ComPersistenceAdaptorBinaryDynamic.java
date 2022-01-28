@@ -17,7 +17,6 @@ import one.microstream.communication.types.ComHostChannel;
 import one.microstream.communication.types.ComPersistenceAdaptor;
 import one.microstream.communication.types.ComPersistenceAdaptorCreator;
 import one.microstream.communication.types.ComProtocol;
-import one.microstream.meta.XDebug;
 import one.microstream.persistence.binary.types.Binary;
 import one.microstream.persistence.binary.types.BinaryPersistenceFoundation;
 import one.microstream.persistence.exceptions.PersistenceException;
@@ -367,15 +366,15 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 		);
 					
 		typeHandlerManager.iteratePerIds((k,v) -> {
-			XDebug.println("key: " + k + " value: " + v.getName());
+			//XDebug.println("key: " + k + " value: " + v.getName());
 			
 			if(typeHandlerManager.lookupTypeHandler(v) == null)
 			{
-				XDebug.println("additional handler for " + v.getName());
+				//XDebug.println("additional handler for " + v.getName());
 				try {
 					typeHandlerManager.ensureTypeHandler(v);
 				} catch(final PersistenceException e) {
-					XDebug.println("No handler for " + v.getName() + ": " + e.getMessage());
+					//XDebug.println("No handler for " + v.getName() + ": " + e.getMessage());
 				}
 				
 			}
