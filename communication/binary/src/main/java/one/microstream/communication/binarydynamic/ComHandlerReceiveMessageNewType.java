@@ -68,41 +68,47 @@ public class ComHandlerReceiveMessageNewType implements ComHandlerReceive<ComMes
 		final XGettingSequence<PersistenceTypeDefinition> defs = this.typeDefintionBuilder.buildTypeDefinitions(typeEntry);
 		for (final PersistenceTypeDefinition ptd : defs)
 		{
-			if(ptd.type() != null) {
-				
+			if(ptd.type() != null) 
+			{
 				final PersistenceTypeHandler<Binary, ?> handler = this.typeHandlerManager.lookupTypeHandler(ptd.type());
 				
-				if(handler != null) {
-					//XDebug.println("handler found");
+				if(handler != null) 
+				{
+					XDebug.println("handler found " + handler.typeId());
 										
 					if(PersistenceTypeDescriptionMember.equalMembers(ptd.allMembers(), handler.allMembers(), this.memberValidator))
 					{
-						//XDebug.println("Exsiting handler matches");
+						XDebug.println("Exsiting handler matches " + handler.typeId());
 					}
 					else
 					{
-						//XDebug.println("Creating legacy handler for exiting");
+						XDebug.println("Creating legacy handler for exiting");
 						this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
 						this.typeHandlerManager.ensureLegacyTypeHandler(ptd, handler);																							
-					}
-					
-				} else {
-					//XDebug.println("no handler found");
-					
+					}				
+				} 
+				else 
+				{
+					XDebug.println("no handler found");
+										
 					final PersistenceTypeHandler<Binary, ?> th = this.typeHandlerEnsurer.ensureTypeHandler(ptd.type());
 									
 					if(PersistenceTypeDescriptionMember.equalMembers(ptd.allMembers(), th.allMembers(), this.memberValidator))
 					{
-						//XDebug.println("Creating new handler for new type");
+						XDebug.println("Creating new handler for new type");
 						this.typeHandlerManager.ensureTypeHandler(ptd.type());
 					}
 					else
 					{
-						//XDebug.println("Legacy handler for new type");
+						XDebug.println("Legacy handler for new type");
 						this.typeHandlerManager.updateCurrentHighestTypeId(ptd.typeId());
 						this.typeHandlerManager.ensureLegacyTypeHandler(ptd, th);																							
 					}									
 				}								
+			} 
+			else
+			{
+				throw new ComExceptionRemoteClassNotFound(ptd.typeName());
 			}
 		}
 	
