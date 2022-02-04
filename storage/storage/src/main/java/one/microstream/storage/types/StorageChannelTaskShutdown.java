@@ -46,7 +46,7 @@ public interface StorageChannelTaskShutdown extends StorageChannelTask
 			final StorageOperationController operationController
 		)
 		{
-			super(timestamp, channelCount);
+			super(timestamp, channelCount, operationController);
 			this.operationController = notNull(operationController);
 		}
 
@@ -73,9 +73,6 @@ public interface StorageChannelTaskShutdown extends StorageChannelTask
 			/* (07.07.2016 TM)FIXME: Shutdown must properly handle completion notification
 			 * so that the issuing shutdown method waits for the shutdown to actually complete.
 			 */
-
-			// may not be done before to give every channel a safe way to notice the processing progress
-			this.operationController.deactivate();
 
 			// can / may never throw an exception
 			channel.reset();

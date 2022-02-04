@@ -61,13 +61,18 @@ import javax.cache.integration.CompletionListener;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 
+import org.slf4j.Logger;
+
 import one.microstream.X;
 import one.microstream.cache.types.MBeanServerUtils.MBeanType;
 import one.microstream.collections.BulkList;
 import one.microstream.collections.types.XList;
 import one.microstream.exceptions.IORuntimeException;
+import one.microstream.persistence.binary.util.Serializer;
 import one.microstream.reference.Reference;
+import one.microstream.reflect.ClassLoaderProvider;
 import one.microstream.typing.KeyValue;
+import one.microstream.util.logging.Logging;
 
 /**
  * JSR-107 compliant {@link javax.cache.Cache}.
@@ -174,6 +179,8 @@ public interface Cache<K, V> extends javax.cache.Cache<K, V>, Unwrappable
 
 	public static class Default<K, V> implements Cache<K, V>
 	{
+		private final static Logger logger = Logging.getLogger(Default.class);
+		
 		private final String                                      name                    ;
 		private final CacheManager                                manager                 ;
 		private final CacheConfiguration<K, V>                    configuration           ;
@@ -189,8 +196,8 @@ public interface Cache<K, V> extends javax.cache.Cache<K, V>, Unwrappable
 		private final ExecutorService                             executorService         ;
 		private final CacheConfigurationMXBean                    cacheConfigurationMXBean;
 		private final CacheStatisticsMXBean                       cacheStatisticsMXBean   ;
-		private final AtomicBoolean                                     isStatisticsEnabled     = new AtomicBoolean();
-		private final AtomicBoolean                                     isClosed                = new AtomicBoolean();
+		private final AtomicBoolean                               isStatisticsEnabled     = new AtomicBoolean();
+		private final AtomicBoolean                               isClosed                = new AtomicBoolean();
 
 		/*
 		 * According to spec cache and configuration, which may be mutable,
@@ -212,9 +219,11 @@ public interface Cache<K, V> extends javax.cache.Cache<K, V>, Unwrappable
 
 			this.objectConverter = configuration.isStoreByValue()
 				? ObjectConverter.ByValue(
-					Serializer.get(
-						Thread.currentThread().getContextClassLoader(),
-						configuration.getSerializerFieldPredicate()
+					Serializer.Binary(
+						configuration.getSerializerFoundation()
+							.setClassLoaderProvider(
+								ClassLoaderProvider.New(Thread.currentThread().getContextClassLoader())
+							)
 					)
 				)
 				: ObjectConverter.ByReference()
@@ -276,6 +285,12 @@ public interface Cache<K, V> extends javax.cache.Cache<K, V>, Unwrappable
 			{
 				this.evictionManager.install(this, this.cacheTable);
 			}
+			
+			logger.debug(
+				"MicroStream Cache '{}' created with following configuration:\n{}",
+				name,
+				configuration
+			);
 		}
 
 		@Override
@@ -400,6 +415,8 @@ public interface Cache<K, V> extends javax.cache.Cache<K, V>, Unwrappable
 			}
 
 			this.cacheTable.clear();
+			
+			logger.debug("MicroStream Cache '{}' closed", this.name);
 		}
 
 		@Override
