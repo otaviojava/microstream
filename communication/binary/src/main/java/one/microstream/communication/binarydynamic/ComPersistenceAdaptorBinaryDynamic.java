@@ -29,6 +29,7 @@ import one.microstream.persistence.types.PersistenceManager;
 import one.microstream.persistence.types.PersistenceSizedArrayLengthController;
 import one.microstream.persistence.types.PersistenceTypeDefinition;
 import one.microstream.persistence.types.PersistenceTypeDictionary;
+import one.microstream.persistence.types.PersistenceTypeDictionaryCompiler;
 import one.microstream.persistence.types.PersistenceTypeDictionaryLoader;
 import one.microstream.persistence.types.PersistenceTypeDictionaryManager;
 import one.microstream.persistence.types.PersistenceTypeDictionaryStorer;
@@ -132,6 +133,12 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 	}
 			
 	@Override
+	public PersistenceTypeDictionaryCompiler provideTypeDictionaryCompiler() 
+	{
+		return createInitializationFoundation().getTypeDictionaryCompiler();
+	}
+	
+	@Override
 	public BinaryPersistenceFoundation<?> createInitializationFoundation()
 	{
 		final BinaryPersistenceFoundation<?> initFoundation = this.foundation.Clone();
@@ -151,7 +158,10 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 			.setRootsProvider(
 				new ComBinaryPersistenceRootsProvider()
 			)
-			.setLegacyTypeMappingResultor(PrintingLegacyTypeMappingResultor.New(initFoundation.getLegacyTypeMappingResultor()))
+			.setTargetByteOrder(this.hostByteOrder)
+			.setLegacyTypeMappingResultor(
+				PrintingLegacyTypeMappingResultor.New(initFoundation.getLegacyTypeMappingResultor())
+			)
 			;
 			
 		
