@@ -32,26 +32,29 @@ import java.nio.channels.NetworkChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import org.slf4j.Logger;
+
 import one.microstream.memory.XMemory;
-import one.microstream.meta.XDebug;
+import one.microstream.util.logging.Logging;
 
 public final class XSockets
 {
+	private final static Logger logger = Logging.getLogger(XSockets.class);
+	
 	public static ByteOrder byteOrder()
 	{
 		return ByteOrder.nativeOrder();
 	}
-	
 	
 	public static final ServerSocketChannel openServerSocketChannel(final InetSocketAddress address)
 		throws ComException
 	{
 		try
 		{
-			XDebug.println("Trying to open ServerSocketChannel with address: " + address);
+			logger.debug("creating server socket with adresss {}", address);
 			final ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(address);
-			XDebug.println("Opend ServerSocketChannel with address: " + address);
+			logger.debug("bound ServerSocketChannel to {}", serverSocketChannel);
 			return serverSocketChannel;
 		}
 		catch(final IOException e)

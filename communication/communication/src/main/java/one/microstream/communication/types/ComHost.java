@@ -137,6 +137,7 @@ public interface ComHost<C> extends Runnable
 			}
 			if(!this.stopped)
 			{
+				logger.info("Microstream Communication Server started!");
 				this.acceptConnections();
 			}
 		}
@@ -192,7 +193,6 @@ public interface ComHost<C> extends Runnable
 		private void synchAcceptConnection()
 		{
 			final C connection;
-			
 			try
 			{
 				connection = this.liveConnectionListener.listenForConnection();
