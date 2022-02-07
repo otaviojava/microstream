@@ -91,11 +91,10 @@ public class ComTLSConnectionHandler extends ComConnectionHandler.Default
 	
 	@Override
 	public ComConnectionListener<ComConnection> createConnectionListener(final InetSocketAddress address)
-        {
+    {
 		final ServerSocketChannel serverSocketChannel = XSockets.openServerSocketChannel(address);
 		return new ComTLSConnectionListener(serverSocketChannel, this.context, this.tlsParameterProvider);
 	}
-
 
 	@Override
 	public ComTLSConnection openConnection(final InetSocketAddress address)

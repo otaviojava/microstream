@@ -23,7 +23,10 @@ package one.microstream.communication.types;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 
+import org.slf4j.Logger;
+
 import one.microstream.com.ComException;
+import one.microstream.util.logging.Logging;
 
 public interface ComClient<C>
 {
@@ -70,6 +73,7 @@ public interface ComClient<C>
 		private final ComPeerIdentifier          peerIdentifier = ComPeerIdentifier.New();
 		private final int                        inactivityTimeOut;
 		
+		private final static Logger logger = Logging.getLogger(Default.class);
 		
 		///////////////////////////////////////////////////////////////////////////
 		// constructors //
@@ -112,6 +116,8 @@ public interface ComClient<C>
 		@Override
 		public ComClientChannel<C> connect(final int retries, final Duration retryDelay) throws ComException
 		{
+			logger.info("Connecting to remote address {} ", this.hostAddress);
+			
 			final C                   conn     = this.connectionHandler.openConnection(this.hostAddress, retries, retryDelay);
 			
 			this.connectionHandler.sendClientIdentifer(conn, this.peerIdentifier.getBuffer());
@@ -121,6 +127,8 @@ public interface ComClient<C>
 			this.connectionHandler.setInactivityTimeout(conn, this.inactivityTimeOut);
 			
 			final ComClientChannel<C> channel  = this.persistenceAdaptor.createClientChannel(conn, protocol, this);
+			
+			logger.info("Successfully connected to {} ", this.hostAddress);
 			
 			return channel;
 		}

@@ -30,12 +30,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+
 import one.microstream.chars.XChars;
 import one.microstream.chars._charArrayRange;
 import one.microstream.com.ComException;
 import one.microstream.com.ComExceptionTimeout;
 import one.microstream.com.XSockets;
 import one.microstream.memory.XMemory;
+import one.microstream.util.logging.Logging;
 
 /**
  * 
@@ -110,6 +113,7 @@ public interface ComConnectionHandler<C>
 		private final int protocolLengthDigitCount = Com.defaultProtocolLengthDigitCount();
 		private long clientConnectTimeout;
 				
+		private final static Logger logger = Logging.getLogger(Default.class);
 			
 		///////////////////////////////////////////////////////////////////////////
 		// constructors //
@@ -156,7 +160,6 @@ public interface ComConnectionHandler<C>
 		)
 		{
 			final ServerSocketChannel serverSocketChannel = XSockets.openServerSocketChannel(address);
-			
 			return ComConnectionListener.Default(serverSocketChannel);
 		}
 				
@@ -164,7 +167,6 @@ public interface ComConnectionHandler<C>
 		public ComConnection openConnection(final InetSocketAddress address)
 		{
 			final SocketChannel clientChannel = XSockets.openChannel(address);
-						
 			return new ComConnection.Default(clientChannel);
 		}
 		
@@ -202,6 +204,8 @@ public interface ComConnectionHandler<C>
 						throw new ComException("Connect to " + address + " failed", connectException);
 					}
 				}
+				
+				logger.debug("Connection attempt {} of {} failed", tries, retries);
 			}
 			while(tries <= retries);
 			
