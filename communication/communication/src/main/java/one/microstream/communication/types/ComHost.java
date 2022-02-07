@@ -25,7 +25,10 @@ import static one.microstream.X.notNull;
 
 import java.net.InetSocketAddress;
 
+import org.slf4j.Logger;
+
 import one.microstream.com.ComException;
+import one.microstream.util.logging.Logging;
 
 /**
  * Host type to listen for new connections and relay them to logic for further processing,
@@ -80,7 +83,7 @@ public interface ComHost<C> extends Runnable
 		private transient ComConnectionListener<C> liveConnectionListener;
 		private volatile boolean stopped;
 		
-		
+		private final static Logger logger = Logging.getLogger(Default.class);
 		
 		
 		
@@ -121,7 +124,7 @@ public interface ComHost<C> extends Runnable
 		@Override
 		public void run()
 		{
-			// the whole method may not be synchronized, otherweise a running host could never be stopped
+			// the whole method may not be synchronized, otherwise a running host could never be stopped
 			synchronized(this)
 			{
 				if(this.isListening())
@@ -129,7 +132,6 @@ public interface ComHost<C> extends Runnable
 					// if the host is already running, this method must abort here.
 					return;
 				}
-				
 				this.liveConnectionListener = this.connectionHandler.createConnectionListener(this.address);
 			}
 			if(!this.stopped)
@@ -150,6 +152,8 @@ public interface ComHost<C> extends Runnable
 			
 			this.liveConnectionListener.close();
 			this.liveConnectionListener = null;
+			
+			logger.info("ComHost has been stopped");
 		}
 
 		@Override
@@ -193,7 +197,7 @@ public interface ComHost<C> extends Runnable
 			catch(final ComException e)
 			{
 				//intentional, don't stop the host if a connection attempt failed
-				e.printStackTrace();
+				logger.error("Failed connection attempt", e);
 				return;
 			}
 			
