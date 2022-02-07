@@ -20,7 +20,7 @@ import one.microstream.communication.types.ComProtocol;
 import one.microstream.persistence.binary.types.Binary;
 import one.microstream.persistence.binary.types.BinaryPersistenceFoundation;
 import one.microstream.persistence.exceptions.PersistenceException;
-import one.microstream.persistence.internal.PrintingLegacyTypeMappingResultor;
+import one.microstream.persistence.internal.LoggingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.Persistence;
 import one.microstream.persistence.types.PersistenceContextDispatcher;
 import one.microstream.persistence.types.PersistenceFoundation;
@@ -133,9 +133,9 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 	}
 			
 	@Override
-	public PersistenceTypeDictionaryCompiler provideTypeDictionaryCompiler() 
+	public PersistenceTypeDictionaryCompiler provideTypeDictionaryCompiler()
 	{
-		return createInitializationFoundation().getTypeDictionaryCompiler();
+		return this.createInitializationFoundation().getTypeDictionaryCompiler();
 	}
 	
 	@Override
@@ -160,7 +160,7 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 			)
 			.setTargetByteOrder(this.hostByteOrder)
 			.setLegacyTypeMappingResultor(
-				PrintingLegacyTypeMappingResultor.New(initFoundation.getLegacyTypeMappingResultor())
+				LoggingLegacyTypeMappingResultor.New(initFoundation.getLegacyTypeMappingResultor())
 			)
 			;
 			
@@ -260,8 +260,8 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 	}
 
 
-	private void ensureTypeHandlers(final PersistenceTypeHandlerManager<Binary> typeHandlerManager, final ComProtocol protocol) 
-	{		
+	private void ensureTypeHandlers(final PersistenceTypeHandlerManager<Binary> typeHandlerManager, final ComProtocol protocol)
+	{
 		for (final KeyValue<Long, PersistenceTypeDefinition> entry : protocol.typeDictionary().allTypeDefinitions()) {
 			typeHandlerManager.ensureTypeHandler(entry.value());
 		}
@@ -272,7 +272,7 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 		final ComConnection connection,
 		final ComProtocol protocol,
 		final ComHost<ComConnection> parent)
-	{	
+	{
 		final PersistenceFoundation<?, ?>                hf  = this.hostConnectionFoundation(connection);
 		final PersistenceManager<?>                      pm  = hf.createPersistenceManager();
 		@SuppressWarnings("unchecked")
@@ -285,8 +285,8 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 				
 		final ComHostChannelDynamic<ComConnection> channel = new ComHostChannelDynamic<>
 		(
-			pm, 
-			connection, 
+			pm,
+			connection,
 			protocol,
 			parent,
 			thm,
@@ -304,7 +304,7 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 				
 		tmr.resolveHost();
 		
-		return channel; 
+		return channel;
 	}
 	
 	@Override
@@ -331,7 +331,7 @@ public class ComPersistenceAdaptorBinaryDynamic implements ComPersistenceAdaptor
 			parent,
 			thm,
 			typeDefinitionBuilder,
-			this.foundation.getTypeHandlerEnsurer());		
+			this.foundation.getTypeHandlerEnsurer());
 		
 		final ComTypeMappingResolver tmr = new ComTypeMappingResolver
 		(
