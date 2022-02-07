@@ -86,7 +86,7 @@ public interface ComConnectionListener<C>
 		@Override
 		public final ComConnection listenForConnection()
 		{
-			logger.debug("listening for incomming connections at {} ", this.serverSocketChannel);
+			logger.debug("listening for incoming connections at {} ", this.serverSocketChannel);
 			
 			final SocketChannel channel = XSockets.acceptSocketChannel(this.serverSocketChannel);
 			return this.createConnection(channel);
