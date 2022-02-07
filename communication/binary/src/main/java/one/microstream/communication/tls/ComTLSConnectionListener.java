@@ -5,17 +5,15 @@ import java.nio.channels.SocketChannel;
 
 import javax.net.ssl.SSLContext;
 
-import one.microstream.com.XSockets;
 import one.microstream.communication.types.ComConnection;
 import one.microstream.communication.types.ComConnectionListener;
 
-public class ComTLSConnectionListener implements ComConnectionListener<ComConnection>
+public class ComTLSConnectionListener extends ComConnectionListener.Default
 {
 	///////////////////////////////////////////////////////////////////////////
 	// instance fields //
 	////////////////////
-	
-	private final ServerSocketChannel serverSocketChannel;
+		
 	private final SSLContext sslContext;
 	private final TLSParametersProvider sslParameters;
 
@@ -29,8 +27,7 @@ public class ComTLSConnectionListener implements ComConnectionListener<ComConnec
 		final SSLContext context,
 		final TLSParametersProvider tlsParameterProvider)
 	{
-		super();
-		this.serverSocketChannel = serverSocketChannel;
+		super(serverSocketChannel);
 		this.sslContext = context;
 		this.sslParameters = tlsParameterProvider;
 	}
@@ -41,21 +38,8 @@ public class ComTLSConnectionListener implements ComConnectionListener<ComConnec
 	////////////
 	
 	@Override
-	public ComTLSConnection listenForConnection()
+	public ComConnection createConnection(final SocketChannel channel)
 	{
-		final SocketChannel channel = XSockets.acceptSocketChannel(this.serverSocketChannel);
 		return new ComTLSConnection(channel, this.sslContext, this.sslParameters, false);
-	}
-
-	@Override
-	public void close()
-	{
-		XSockets.closeChannel(this.serverSocketChannel);
-	}
-
-	@Override
-	public boolean isAlive()
-	{
-		return this.serverSocketChannel.isOpen();
 	}
 }

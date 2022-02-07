@@ -25,7 +25,10 @@ import static one.microstream.X.notNull;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import org.slf4j.Logger;
+
 import one.microstream.com.XSockets;
+import one.microstream.util.logging.Logging;
 
 /**
  * 
@@ -33,6 +36,8 @@ import one.microstream.com.XSockets;
  */
 public interface ComConnectionListener<C>
 {
+	public ComConnection createConnection(SocketChannel channel);
+	
 	public C listenForConnection();
 	
 	public void close();
@@ -46,7 +51,7 @@ public interface ComConnectionListener<C>
 		);
 	}
 	
-	public final class Default implements ComConnectionListener<ComConnection>
+	public class Default implements ComConnectionListener<ComConnection>
 	{
 		///////////////////////////////////////////////////////////////////////////
 		// instance fields //
@@ -54,13 +59,14 @@ public interface ComConnectionListener<C>
 		
 		private final ServerSocketChannel serverSocketChannel;
 		
+		private final static Logger logger = Logging.getLogger(Default.class);
 		
 		
 		///////////////////////////////////////////////////////////////////////////
 		// constructors //
 		/////////////////
 		
-		Default(final ServerSocketChannel serverSocketChannel)
+		protected Default(final ServerSocketChannel serverSocketChannel)
 		{
 			super();
 			this.serverSocketChannel = serverSocketChannel;
@@ -73,15 +79,23 @@ public interface ComConnectionListener<C>
 		////////////
 
 		@Override
+		public ComConnection createConnection(final SocketChannel channel) {
+			return new ComConnection.Default(channel);
+		}
+		
+		@Override
 		public final ComConnection listenForConnection()
 		{
+			logger.debug("listening for incomming connections at {} ", this.serverSocketChannel);
+			
 			final SocketChannel channel = XSockets.acceptSocketChannel(this.serverSocketChannel);
-			return new ComConnection.Default(channel);
+			return this.createConnection(channel);
 		}
 
 		@Override
 		public final void close()
 		{
+			logger.debug("closing serverSocket Channel {}", this.serverSocketChannel);
 			XSockets.closeChannel(this.serverSocketChannel);
 		}
 
@@ -92,7 +106,5 @@ public interface ComConnectionListener<C>
 		}
 		
 	}
-
-	
 	
 }

@@ -124,6 +124,7 @@ public interface ComHost<C> extends Runnable
 		@Override
 		public void run()
 		{
+			logger.info("Starting Microstream Communication Server ...");
 			// the whole method may not be synchronized, otherwise a running host could never be stopped
 			synchronized(this)
 			{
@@ -143,6 +144,8 @@ public interface ComHost<C> extends Runnable
 		@Override
 		public void stop()
 		{
+			logger.debug("Stopping ComHost...");
+			
 			this.stopped = true;
 			
 			if(this.liveConnectionListener == null)
