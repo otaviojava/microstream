@@ -5,11 +5,21 @@ import java.nio.channels.SocketChannel;
 
 import javax.net.ssl.SSLContext;
 
+import org.slf4j.Logger;
+
 import one.microstream.communication.types.ComConnection;
 import one.microstream.communication.types.ComConnectionListener;
+import one.microstream.util.logging.Logging;
 
 public class ComTLSConnectionListener extends ComConnectionListener.Default
 {
+	///////////////////////////////////////////////////////////////////////////
+	// constants //
+	//////////////
+	
+	private final static Logger logger = Logging.getLogger(ComConnectionListener.class);
+
+
 	///////////////////////////////////////////////////////////////////////////
 	// instance fields //
 	////////////////////
@@ -40,6 +50,8 @@ public class ComTLSConnectionListener extends ComConnectionListener.Default
 	@Override
 	public ComConnection createConnection(final SocketChannel channel)
 	{
-		return new ComTLSConnection(channel, this.sslContext, this.sslParameters, false);
+		final ComConnection connection = new ComTLSConnection(channel, this.sslContext, this.sslParameters, false);
+		logger.debug("created new ComConnection {}", connection);
+		return connection;
 	}
 }

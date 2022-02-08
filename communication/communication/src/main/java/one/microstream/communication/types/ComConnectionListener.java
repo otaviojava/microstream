@@ -54,14 +54,19 @@ public interface ComConnectionListener<C>
 	public class Default implements ComConnectionListener<ComConnection>
 	{
 		///////////////////////////////////////////////////////////////////////////
+		// constants //
+		//////////////
+		
+		private final static Logger logger = Logging.getLogger(ComConnectionListener.class);
+		
+		
+		///////////////////////////////////////////////////////////////////////////
 		// instance fields //
 		////////////////////
 		
 		private final ServerSocketChannel serverSocketChannel;
 		
-		private final static Logger logger = Logging.getLogger(Default.class);
-		
-		
+						
 		///////////////////////////////////////////////////////////////////////////
 		// constructors //
 		/////////////////
@@ -71,16 +76,18 @@ public interface ComConnectionListener<C>
 			super();
 			this.serverSocketChannel = serverSocketChannel;
 		}
-		
-		
+				
 		
 		///////////////////////////////////////////////////////////////////////////
 		// methods //
 		////////////
 
 		@Override
-		public ComConnection createConnection(final SocketChannel channel) {
-			return new ComConnection.Default(channel);
+		public ComConnection createConnection(final SocketChannel channel)
+		{
+			final ComConnection connection =  new ComConnection.Default(channel);
+			logger.debug("created new ComConnection {}", connection);
+			return connection;
 		}
 		
 		@Override
