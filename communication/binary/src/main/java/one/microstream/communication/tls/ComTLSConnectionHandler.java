@@ -9,11 +9,14 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 
+import org.slf4j.Logger;
+
 import one.microstream.com.ComException;
 import one.microstream.com.XSockets;
 import one.microstream.communication.types.ComConnection;
 import one.microstream.communication.types.ComConnectionHandler;
 import one.microstream.communication.types.ComConnectionListener;
+import one.microstream.util.logging.Logging;
 
 public class ComTLSConnectionHandler extends ComConnectionHandler.Default
 {
@@ -23,6 +26,7 @@ public class ComTLSConnectionHandler extends ComConnectionHandler.Default
 	
 	private final static boolean TLS_CLIENT_MODE = true;
 	
+	private final static Logger logger = Logging.getLogger(ComConnectionHandler.class);
 	
 	///////////////////////////////////////////////////////////////////////////
 	// instance fields //
@@ -93,14 +97,18 @@ public class ComTLSConnectionHandler extends ComConnectionHandler.Default
 	public ComConnectionListener<ComConnection> createConnectionListener(final InetSocketAddress address)
     {
 		final ServerSocketChannel serverSocketChannel = XSockets.openServerSocketChannel(address);
-		return new ComTLSConnectionListener(serverSocketChannel, this.context, this.tlsParameterProvider);
+		final ComConnectionListener<ComConnection> connectionListener =  new ComTLSConnectionListener(serverSocketChannel, this.context, this.tlsParameterProvider);
+		logger.debug("created new ComConnectionListener {}", connectionListener);
+		return connectionListener;
 	}
 
 	@Override
 	public ComTLSConnection openConnection(final InetSocketAddress address)
         {
 		final SocketChannel clientChannel = XSockets.openChannel(address);
-		return new ComTLSConnection(clientChannel, this.context, this.tlsParameterProvider, TLS_CLIENT_MODE);
+		final ComTLSConnection connection =  new ComTLSConnection(clientChannel, this.context, this.tlsParameterProvider, TLS_CLIENT_MODE);
+		logger.debug("created new ComConnection {}", connection);
+		return connection;
 	}
 
 	@Override

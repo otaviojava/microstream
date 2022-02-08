@@ -8,9 +8,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+
 import one.microstream.com.ComException;
 import one.microstream.com.ComExceptionTimeout;
 import one.microstream.com.XSockets;
+import one.microstream.util.logging.Logging;
 
 public interface ComConnection
 {
@@ -30,6 +33,8 @@ public interface ComConnection
 		private final SocketChannel channel;
 		private int readTimeOut = 10000;
 		
+		private final Logger logger = Logging.getLogger(ComConnection.class);
+		
 		public Default(final SocketChannel channel)
 		{
 			super();
@@ -40,6 +45,7 @@ public interface ComConnection
 		public void close()
 		{
 			XSockets.closeChannel(this.channel);
+			this.logger.debug("closed connection {}", this);
 		}
 
 		@Override

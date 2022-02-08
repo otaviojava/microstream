@@ -18,10 +18,13 @@ import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 
+import org.slf4j.Logger;
+
 import one.microstream.com.ComException;
 import one.microstream.com.ComExceptionTimeout;
 import one.microstream.com.XSockets;
 import one.microstream.communication.types.ComConnection;
+import one.microstream.util.logging.Logging;
 
 public class ComTLSConnection implements ComConnection
 {
@@ -43,6 +46,8 @@ public class ComTLSConnection implements ComConnection
 	private final boolean               clientMode;
 	private final TLSParametersProvider tlsParameterProvider;
 	
+	private final Logger logger = Logging.getLogger(ComConnection.class);
+	
 	///////////////////////////////////////////////////////////////////////////
 	// constructors //
 	/////////////////
@@ -52,6 +57,7 @@ public class ComTLSConnection implements ComConnection
 		final TLSParametersProvider tlsParameterProvider,
 		final boolean clientMode)
 	{
+		super();
 		this.readTimeOut          = tlsParameterProvider.getHandshakeReadTimeOut();
 		this.channel              = channel;
 		this.sslContext           = sslContext;
@@ -116,6 +122,8 @@ public class ComTLSConnection implements ComConnection
 		}
 		
 		XSockets.closeChannel(this.channel);
+		
+		this.logger.debug("closed connection {}", this);
 	}
 	
 	private void closeSSLEngine()

@@ -107,14 +107,18 @@ public interface ComConnectionHandler<C>
 	public class Default implements ComConnectionHandler<ComConnection>
 	{
 		///////////////////////////////////////////////////////////////////////////
+		// constants //
+		//////////////
+		
+		private final static Logger logger = Logging.getLogger(ComConnectionHandler.class);
+		
+		///////////////////////////////////////////////////////////////////////////
 		// instance fields //
 		////////////////////
 		
 		private final int protocolLengthDigitCount = Com.defaultProtocolLengthDigitCount();
 		private long clientConnectTimeout;
-				
-		private final static Logger logger = Logging.getLogger(Default.class);
-			
+								
 		///////////////////////////////////////////////////////////////////////////
 		// constructors //
 		/////////////////
@@ -160,14 +164,18 @@ public interface ComConnectionHandler<C>
 		)
 		{
 			final ServerSocketChannel serverSocketChannel = XSockets.openServerSocketChannel(address);
-			return ComConnectionListener.Default(serverSocketChannel);
+			final ComConnectionListener<ComConnection> connectionListener = new ComConnectionListener.Default(serverSocketChannel);
+			logger.debug("created new ComConnectionListener {}", connectionListener);
+			return connectionListener;
 		}
 				
 		@Override
 		public ComConnection openConnection(final InetSocketAddress address)
 		{
 			final SocketChannel clientChannel = XSockets.openChannel(address);
-			return new ComConnection.Default(clientChannel);
+			final ComConnection connection = new ComConnection.Default(clientChannel);
+			logger.debug("created new ComConnection {}", connection);
+			return connection;
 		}
 		
 		@Override
