@@ -501,6 +501,11 @@ public class ComTLSConnection implements ComConnection
 			throw new ComException("TLS handshake failed ", e);
 		}
 		
+		this.logger.debug("SSLSession established {} {}",
+			this.sslEngine.getSession().getProtocol(),
+			this.sslEngine.getSession().getCipherSuite()
+			);
+		
 	}
 
 
