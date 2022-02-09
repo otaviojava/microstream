@@ -1,17 +1,13 @@
 package one.microstream.communication.types;
 
-import one.microstream.meta.XDebug;
+import org.slf4j.Logger;
+
+import one.microstream.util.logging.Logging;
 
 public interface ComHostExceptionHandler<C>
 {
 	public void handleException(Throwable exception, ComChannel channel);
 	public void handleConnectException(Throwable exception, C connection);
-
-	
-	public static void defaultHandleException(final Throwable exception, final ComChannel channel)
-	{
-		channel.close();
-	}
 	
 	public static <C> ComHostExceptionHandler<C> New(final ComConnectionHandler<C> connectionHandler)
 	{
@@ -20,7 +16,19 @@ public interface ComHostExceptionHandler<C>
 	
 	public final class Default<C> implements ComHostExceptionHandler<C>
 	{
+		///////////////////////////////////////////////////////////////////////////
+		// constants //
+		//////////////
+			
+		private final static Logger logger = Logging.getLogger(ComConnectionHandler.class);
+
+		
+		///////////////////////////////////////////////////////////////////////////
+		// instance fields //
+		////////////////////
+		
 		private final ComConnectionHandler<C> connectionHandler;
+
 		
 		///////////////////////////////////////////////////////////////////////////
 		// constructors //
@@ -40,24 +48,22 @@ public interface ComHostExceptionHandler<C>
 		@Override
 		public void handleException(final Throwable exception, final ComChannel channel)
 		{
-			XDebug.println("Handled channel exception");
-			exception.printStackTrace();
-			ComHostExceptionHandler.defaultHandleException(exception, channel);
+			logger.error("Closing connection because: ", exception);
+			channel.close();
 		}
 
 
 		@Override
 		public void handleConnectException(final Throwable exception, final C connection)
 		{
-			//XDebug.println("Handled connection exception");
-			//exception.printStackTrace();
+			logger.error("Closing connection because of ", exception);
 			try
 			{
 				this.connectionHandler.close(connection);
 			}
 			catch(final Exception e)
 			{
-				//Do nothing if closing fails
+				logger.error("faild to close connection! ", exception);
 			}
 		}
 		
