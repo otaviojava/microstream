@@ -1,7 +1,6 @@
 package one.microstream.communication.tls;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.security.KeyManagementException;
@@ -109,18 +108,6 @@ public class ComTLSConnectionHandler extends ComConnectionHandler.Default
 		final ComTLSConnection connection =  new ComTLSConnection(clientChannel, this.context, this.tlsParameterProvider, TLS_CLIENT_MODE);
 		logger.debug("created new ComConnection {}", connection);
 		return connection;
-	}
-
-	@Override
-	public void sendClientIdentifer(final ComConnection connection, final ByteBuffer buffer)
-	{
-		connection.writeUnsecured(buffer);
-	}
-	
-	@Override
-	public void receiveClientIdentifer(final ComConnection connection, final ByteBuffer buffer)
-	{
-		connection.readUnsecure(buffer);
 	}
 
 	@Override

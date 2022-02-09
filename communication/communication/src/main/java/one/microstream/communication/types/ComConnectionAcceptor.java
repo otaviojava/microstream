@@ -24,7 +24,10 @@ import static one.microstream.X.notNull;
 
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+
 import one.microstream.com.ComException;
+import one.microstream.util.logging.Logging;
 
 
 /**
@@ -71,6 +74,12 @@ public interface ComConnectionAcceptor<C>
 	
 	public final class Default<C> implements ComConnectionAcceptor<C>
 	{
+		///////////////////////////////////////////////////////////////////////////
+		// constants //
+		//////////////
+		
+		private final static Logger logger = Logging.getLogger(Default.class);
+		
 		///////////////////////////////////////////////////////////////////////////
 		// instance fields //
 		////////////////////
@@ -164,8 +173,11 @@ public interface ComConnectionAcceptor<C>
 												
 			if(expectedIdentifer.compareTo(clientIdentifierBuffer) != 0)
 			{
+				logger.error("Faild to validate client type identifier");
 				throw new ComException("invalid peer identifier");
 			}
+			
+			logger.debug("client identifier accepted");
 
 		}
 		

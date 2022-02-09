@@ -93,7 +93,7 @@ public interface ComConnectionHandler<C>
 	
 	public void setClientConnectTimeout(int clientConnectTimeout);
 	
-	public void sendClientIdentifer(C connection, ByteBuffer buffer);
+	public void sendClientIdentifer(C connection, ComPeerIdentifier peerIdentifier);
 	
 	public void receiveClientIdentifer(final C connection, final ByteBuffer buffer);
 	
@@ -271,14 +271,16 @@ public interface ComConnectionHandler<C>
 		
 		
 		@Override
-		public void sendClientIdentifer(final ComConnection connection, final ByteBuffer buffer)
+		public void sendClientIdentifer(final ComConnection connection, final ComPeerIdentifier peerIdentifier)
 		{
-			connection.writeUnsecured(buffer);
+			logger.info("Sending client identifer {} ", peerIdentifier);
+			connection.writeUnsecured(peerIdentifier.getBuffer());
 		}
 		
 		@Override
 		public void receiveClientIdentifer(final ComConnection connection, final ByteBuffer buffer)
 		{
+			logger.info("Receiving client identifer");
 			connection.readUnsecure(buffer);
 		}
 		
@@ -295,6 +297,7 @@ public interface ComConnectionHandler<C>
 				this.protocolLengthDigitCount
 			);
 			
+			logger.debug("Sending ComProtocol to peer.");
 			this.write(connection, bufferedProtocol);
 		}
 		
@@ -304,6 +307,8 @@ public interface ComConnectionHandler<C>
 			final ComProtocolStringConverter stringConverter
 		)
 		{
+			logger.debug("Awaiting ComProtocol from peer ...");
+			
 			final ByteBuffer lengthBuffer = XMemory.allocateDirectNative(this.protocolLengthDigitCount);
 			this.read(connection, lengthBuffer);
 						
@@ -319,7 +324,10 @@ public interface ComConnectionHandler<C>
 			protocolBuffer.position(1);
 			final char[] protocolChars = XChars.standardCharset().decode(protocolBuffer).array();
 			
-			return stringConverter.parse(_charArrayRange.New(protocolChars));
+			final ComProtocol protocol = stringConverter.parse(_charArrayRange.New(protocolChars));
+			
+			logger.debug("Received ComProtocol from peer successfully.");
+			return protocol;
 		}
 
 
@@ -327,6 +335,7 @@ public interface ComConnectionHandler<C>
 		public void enableSecurity(final ComConnection connection)
 		{
 			//The default Connection is not encrypted, nothing to do
+			logger.warn("Using unsecured connection!");
 		}
 
 
@@ -334,6 +343,7 @@ public interface ComConnectionHandler<C>
 		public void setInactivityTimeout(final ComConnection connection, final int inactivityTimeout)
 		{
 			connection.setTimeOut(inactivityTimeout);
+			logger.debug("Set connection inactivity timeout {}", inactivityTimeout);
 		}
 		
 		@Override

@@ -63,6 +63,13 @@ public interface ComClient<C>
 	public final class Default<C> implements ComClient<C>
 	{
 		///////////////////////////////////////////////////////////////////////////
+		// constants //
+		//////////////
+		
+		private final static Logger logger = Logging.getLogger(Default.class);
+		
+		
+		///////////////////////////////////////////////////////////////////////////
 		// instance fields //
 		////////////////////
 
@@ -72,8 +79,6 @@ public interface ComClient<C>
 		private final ComPersistenceAdaptor<C>   persistenceAdaptor;
 		private final ComPeerIdentifier          peerIdentifier = ComPeerIdentifier.New();
 		private final int                        inactivityTimeOut;
-		
-		private final static Logger logger = Logging.getLogger(Default.class);
 		
 		///////////////////////////////////////////////////////////////////////////
 		// constructors //
@@ -117,10 +122,10 @@ public interface ComClient<C>
 		public ComClientChannel<C> connect(final int retries, final Duration retryDelay) throws ComException
 		{
 			logger.info("Connecting to remote address {} ", this.hostAddress);
-			
 			final C                   conn     = this.connectionHandler.openConnection(this.hostAddress, retries, retryDelay);
-			
-			this.connectionHandler.sendClientIdentifer(conn, this.peerIdentifier.getBuffer());
+						
+			this.connectionHandler.sendClientIdentifer(conn, this.peerIdentifier);
+						
 			this.connectionHandler.enableSecurity(conn);
 			
 			final ComProtocol         protocol = this.connectionHandler.receiveProtocol(conn, this.protocolParser);
