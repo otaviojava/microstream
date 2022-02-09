@@ -67,6 +67,7 @@ public abstract class ComChannelDynamic<C> implements ComChannel
 		
 		if(handler != null )
 		{
+			logger.trace("sending data with handler {}", handler.getClass());
 			handler.sendMessage(graphRoot);
 		}
 		else
@@ -91,6 +92,7 @@ public abstract class ComChannelDynamic<C> implements ComChannel
 			final ComHandlerReceive<?> handler = this.handlers.lookupReceive(received.getClass());
 			if(handler != null )
 			{
+				logger.trace("processing received data with handler {}", handler.getClass());
 				received = handler.processMessage(received);
 			
 				if(!handler.continueReceiving())

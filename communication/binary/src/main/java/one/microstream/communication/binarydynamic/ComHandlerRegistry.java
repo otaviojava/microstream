@@ -1,6 +1,9 @@
 package one.microstream.communication.binarydynamic;
 
+import org.slf4j.Logger;
+
 import one.microstream.collections.MiniMap;
+import one.microstream.util.logging.Logging;
 
 public interface ComHandlerRegistry
 {
@@ -14,6 +17,12 @@ public interface ComHandlerRegistry
 	
 	public final class Default implements ComHandlerRegistry
 	{
+		///////////////////////////////////////////////////////////////////////////
+		// constants //
+		//////////////
+		
+		private final static Logger logger = Logging.getLogger(Default.class);
+		
 		///////////////////////////////////////////////////////////////////////////
 		// instance fields //
 		////////////////////
@@ -37,6 +46,7 @@ public interface ComHandlerRegistry
 		@Override
 		public final <T> boolean registerSendHandler(final Class<T> type, final ComHandlerSend<?> handler)
 		{
+			logger.debug("registered sending handler {} for type {}", handler.getClass(), type);
 			return this.sendHandlers.put(type, handler) != null;
 		}
 		
@@ -50,6 +60,7 @@ public interface ComHandlerRegistry
 		@Override
 		public final <T> boolean registerReceiveHandler(final Class<T> type, final ComHandlerReceive<?> handler)
 		{
+			logger.debug("registered receiving handler {} for type {}", handler.getClass(), type);
 			return this.receiveHandlers.put(type, handler) != null;
 		}
 		
