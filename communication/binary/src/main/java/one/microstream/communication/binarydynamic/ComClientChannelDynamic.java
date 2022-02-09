@@ -53,7 +53,6 @@ public class ComClientChannelDynamic<C>
 		this.handlers.registerReceiveHandler(
 			ComMessageNewType.class,
 			new ComHandlerReceiveMessageNewType(
-				this,
 				typeHandlerManager,
 				typeDefintionBuilder,
 				typeHandlerEnsurer

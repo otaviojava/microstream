@@ -1,7 +1,17 @@
 package one.microstream.communication.binarydynamic;
 
+import org.slf4j.Logger;
+
+import one.microstream.util.logging.Logging;
+
 public class ComHandlerSendMessageNewType implements ComHandlerSend<ComMessageNewType>
 {
+	///////////////////////////////////////////////////////////////////////////
+	// constants //
+	//////////////
+	
+	private final static Logger logger = Logging.getLogger(ComHandlerSendMessageNewType.class);
+	
 	///////////////////////////////////////////////////////////////////////////
 	// instance fields //
 	////////////////////
@@ -28,8 +38,9 @@ public class ComHandlerSendMessageNewType implements ComHandlerSend<ComMessageNe
 
 	@Override
 	public Void sendMessage(final ComMessageNewType message)
-	{					
-		this.comChannel.persistenceManager.store(message);		
+	{
+		logger.debug("sending new type message for type {}", message.typeEntry());
+		this.comChannel.persistenceManager.store(message);
 		return null;
 	}
 
