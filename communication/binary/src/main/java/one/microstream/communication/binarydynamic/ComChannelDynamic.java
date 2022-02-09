@@ -1,11 +1,20 @@
 package one.microstream.communication.binarydynamic;
 
+import org.slf4j.Logger;
+
 import one.microstream.communication.types.ComChannel;
 import one.microstream.communication.types.ComProtocol;
 import one.microstream.persistence.types.PersistenceManager;
+import one.microstream.util.logging.Logging;
 
 public abstract class ComChannelDynamic<C> implements ComChannel
 {
+	///////////////////////////////////////////////////////////////////////////
+	// constants //
+	//////////////
+	
+	private final static Logger logger = Logging.getLogger(Default.class);
+
 	///////////////////////////////////////////////////////////////////////////
 	// instance fields //
 	////////////////////
@@ -47,6 +56,8 @@ public abstract class ComChannelDynamic<C> implements ComChannel
 	@Override
 	public final void send(final Object graphRoot)
 	{
+		logger.trace("sending data");
+		
 		ComHandlerSend<?> handler = null;
 		
 		if(graphRoot != null)
@@ -62,6 +73,8 @@ public abstract class ComChannelDynamic<C> implements ComChannel
 		{
 			this.persistenceManager.store(new ComMessageData(graphRoot));
 		}
+		
+		logger.trace("sended data successfully");
 	}
 
 	@Override
@@ -71,6 +84,7 @@ public abstract class ComChannelDynamic<C> implements ComChannel
 		
 		while(null == received)
 		{
+			logger.trace("waiting for data");
 			received = this.persistenceManager.get();
 			this.persistenceManager.objectRegistry().clear();
 	
@@ -81,10 +95,12 @@ public abstract class ComChannelDynamic<C> implements ComChannel
 			
 				if(!handler.continueReceiving())
 				{
-					return received;
+					break;
 				}
 			}
 		}
+		
+		logger.trace("data received successfully");
 		
 		return received;
 	}
@@ -92,6 +108,7 @@ public abstract class ComChannelDynamic<C> implements ComChannel
 	@Override
 	public final void close()
 	{
+		logger.trace("closing ComChannel");
 		this.persistenceManager.close();
 	}
 }

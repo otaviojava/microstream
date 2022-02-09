@@ -22,7 +22,10 @@ package one.microstream.communication.types;
 
 import static one.microstream.X.notNull;
 
+import org.slf4j.Logger;
+
 import one.microstream.persistence.types.PersistenceManager;
+import one.microstream.util.logging.Logging;
 
 
 public interface ComChannel
@@ -54,13 +57,18 @@ public interface ComChannel
 	public class Default implements ComChannel
 	{
 		///////////////////////////////////////////////////////////////////////////
+		// constants //
+		//////////////
+		
+		private final static Logger logger = Logging.getLogger(Default.class);
+
+		///////////////////////////////////////////////////////////////////////////
 		// instance fields //
 		////////////////////
 		
 		private final PersistenceManager<?> persistenceManager;
 		
-		
-		
+			
 		///////////////////////////////////////////////////////////////////////////
 		// constructors //
 		/////////////////
@@ -70,8 +78,7 @@ public interface ComChannel
 			super();
 			this.persistenceManager = persistenceManager;
 		}
-		
-		
+				
 		
 		///////////////////////////////////////////////////////////////////////////
 		// methods //
@@ -84,7 +91,10 @@ public interface ComChannel
 			 * "store" is a little unfitting here.
 			 * However, technically, it is correct. The graph is "stored" (written) to the network connection.
 			 */
+			
+			logger.trace("sending data");
 			this.persistenceManager.store(graphRoot);
+			logger.trace("sended data successfully");
 		}
 		
 		@Override
@@ -94,12 +104,18 @@ public interface ComChannel
 			 * in the context of a network connection, the generic get() means
 			 * receive whatever the other side is sending.
 			 */
-			return this.persistenceManager.get();
+			
+			logger.trace("waiting for data");
+			final Object received = this.persistenceManager.get();
+			logger.trace("data received successfully");
+			
+			return received;
 		}
 		
 		@Override
 		public final void close()
 		{
+			logger.trace("closing ComChannel {}");
 			this.persistenceManager.close();
 		}
 		
