@@ -217,7 +217,7 @@ public interface BinaryStorer extends PersistenceStorer
 			return this.chunks[(int)(objectId & this.chunksHashRange)];
 		}
 
-		protected Binary synchComplete()
+		protected ChunksBuffer synchComplete()
 		{
 			for(final ChunksBuffer chunk : this.chunks)
 			{
@@ -512,6 +512,8 @@ public interface BinaryStorer extends PersistenceStorer
 				"Committing {} object(s)",
 				LazyArg(this::size)   // use lazy here, #size() locks
 			);
+
+			ChunksBuffer writeData = null;
 			
 			// isEmpty locks internally
 			if(!this.isEmpty())
@@ -519,7 +521,6 @@ public interface BinaryStorer extends PersistenceStorer
 				// must validate here, too, in case the WriteController disabled writing during the storer's existence.
 				this.target.validateIsStoringEnabled();
 				
-				final Binary writeData;
 				synchronized(this.head)
 				{
 					this.typeManager.checkForPendingRootInstances();
@@ -527,8 +528,12 @@ public interface BinaryStorer extends PersistenceStorer
 					writeData = this.synchComplete();
 				}
 				
+				writeData.iterateChannelChunks(Binary::mark);
+								
 				// very costly IO-operation does not need to occupy the lock
 				this.target.write(writeData);
+				
+				writeData.iterateChannelChunks(Binary::reset);
 				
 				synchronized(this.head)
 				{
@@ -541,7 +546,7 @@ public interface BinaryStorer extends PersistenceStorer
 			logger.debug("Commit finished successfully");
 			
 			// not used (yet?)
-			return null;
+			return writeData;
 		}
 		
 		public final long lookupOid(final Object object)

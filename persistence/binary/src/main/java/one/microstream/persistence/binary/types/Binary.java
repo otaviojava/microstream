@@ -1674,6 +1674,11 @@ public abstract class Binary implements Chunk
 		PersistenceObjectIdAcceptor acceptor
 	);
 
+	public abstract void mark();
+	
+	public abstract void reset();
+	
+	
 	public final long storeCharsAsList(
 		final long   memoryOffset,
 		final char[] chars       ,
