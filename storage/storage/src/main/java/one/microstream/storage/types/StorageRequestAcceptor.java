@@ -99,6 +99,8 @@ public interface StorageRequestAcceptor
 
 	public void importFiles(XGettingEnum<AFile> importFiles) throws InterruptedException;
 
+	public void importData(Binary data) throws InterruptedException;
+
 	public StorageRawFileStatistics createStatistics() throws InterruptedException;
 
 
@@ -254,6 +256,12 @@ public interface StorageRequestAcceptor
 		public void importFiles(final XGettingEnum<AFile> importFiles) throws InterruptedException
 		{
 			waitOnTask(this.taskBroker.enqueueImportFromFilesTask(importFiles));
+		}
+		
+		@Override
+		public void importData(final Binary data) throws InterruptedException
+		{
+			waitOnTask(this.taskBroker.enqueueImportFromBinaryTask(data));
 		}
 
 	}

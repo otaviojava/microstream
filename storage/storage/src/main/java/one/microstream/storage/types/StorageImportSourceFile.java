@@ -22,9 +22,46 @@ package one.microstream.storage.types;
 
 import java.util.function.Consumer;
 
+import one.microstream.afs.types.AFile;
+
 
 public interface StorageImportSourceFile extends StorageClosableFile
 {
 	public void iterateBatches(Consumer<? super StorageChannelImportBatch> iterator);
+	
+	
+	public static class Default extends StorageChannelFile.Abstract implements StorageImportSourceFile
+	{
+		final StorageChannelImportBatch.Default headBatch;
+	          StorageImportSourceFile.Default   next     ;
+	    
+	    Default(
+			final int                               channelIndex,
+			final AFile                             file        ,
+			final StorageChannelImportBatch.Default headBatch
+		)
+		{
+			super(file, channelIndex);
+			this.headBatch = headBatch;
+		}
+	    
+	    @Override
+		public final void iterateBatches(final Consumer<? super StorageChannelImportBatch> iterator)
+		{
+			for(StorageChannelImportBatch.Default batch = this.headBatch; batch != null; batch = batch.batchNext)
+			{
+				iterator.accept(batch);
+			}
+		}
+
+		@Override
+		public String toString()
+		{
+			return Integer.toString(this.channelIndex()) + " "
+				+ (this.file() == null ? "<Dummy>"  : this.file().toPathString() + " " + this.headBatch)
+			;
+		}
+		
+	}
 
 }

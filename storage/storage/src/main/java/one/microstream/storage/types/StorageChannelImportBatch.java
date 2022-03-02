@@ -22,7 +22,7 @@ package one.microstream.storage.types;
 
 import java.util.function.Consumer;
 
-public interface StorageChannelImportBatch
+public interface StorageChannelImportBatch extends StorageChannelImportEntity
 {
 	public long fileOffset();
 
@@ -31,4 +31,64 @@ public interface StorageChannelImportBatch
 	public void iterateEntities(Consumer<? super StorageChannelImportEntity> iterator);
 
 	public StorageChannelImportEntity first();
+	
+	
+	public static class Default extends StorageChannelImportEntity.Default implements StorageChannelImportBatch
+	{
+		long                              batchOffset;
+	    long                              batchLength;
+		StorageChannelImportBatch.Default batchNext  ;
+
+		Default()
+		{
+			super(0, 0, null);
+		}
+
+		Default(
+			final long                      batchOffset ,
+			final int                       entityLength,
+			final long                      objectId    ,
+			final StorageEntityType.Default type
+		)
+		{
+			super(entityLength, objectId, type);
+			this.batchOffset = batchOffset ;
+			this.batchLength = entityLength;
+		}
+		
+		@Override
+		public long fileOffset()
+		{
+			return this.batchOffset;
+		}
+
+		@Override
+		public final long fileLength()
+		{
+			return this.batchLength;
+		}
+
+		@Override
+		public final void iterateEntities(final Consumer<? super StorageChannelImportEntity> iterator)
+		{
+			for(StorageChannelImportEntity.Default e = this.first(); e != null; e = e.next)
+			{
+				iterator.accept(e);
+			}
+		}
+
+		@Override
+		public final StorageChannelImportEntity.Default first()
+		{
+			return this.type != null  ? this : this.batchNext;
+		}
+
+		@Override
+		public final String toString()
+		{
+			return "batch" + "[" + this.length + "]" + (this.batchNext == null ? "" : " " + this.batchNext.toString());
+		}
+		
+	}
+	
 }

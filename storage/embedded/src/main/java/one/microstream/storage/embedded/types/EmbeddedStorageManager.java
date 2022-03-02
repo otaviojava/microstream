@@ -560,7 +560,11 @@ public interface EmbeddedStorageManager extends StorageManager
 			this.singletonConnection().importFiles(importFiles);
 		}
 		
-
+		@Override
+		public final void importData(final Binary data)
+		{
+			this.singletonConnection().importData(data);
+		}
 		
 		@Deprecated
 		@Override

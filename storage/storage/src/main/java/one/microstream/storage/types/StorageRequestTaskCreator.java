@@ -52,15 +52,15 @@ public interface StorageRequestTaskCreator
 	);
 	
 	public StorageRequestTaskLoadByTids createLoadTaskByTids(
-		PersistenceIdSet           loadTids    , 
-		int                        channelCount, 
+		PersistenceIdSet           loadTids    ,
+		int                        channelCount,
 		StorageOperationController controller
 	);
 
 	public default StorageRequestTaskExportEntitiesByType createExportTypesTask(
 		final int                                 channelCount      ,
 		final StorageEntityTypeExportFileProvider exportFileProvider,
-		StorageOperationController                controller
+		final StorageOperationController                controller
 	)
 	{
 		return this.createExportTypesTask(channelCount, exportFileProvider, controller);
@@ -97,11 +97,19 @@ public interface StorageRequestTaskCreator
 		StorageOperationController  operationController
 	);
 
-	public StorageRequestTaskImportData createImportFromFilesTask(
+	public StorageRequestTaskImportDataFiles createImportFromFilesTask(
 		int                           channelCount          ,
 		StorageDataFileEvaluator      fileEvaluator         ,
 		StorageObjectIdRangeEvaluator objectIdRangeEvaluator,
 		XGettingEnum<AFile>           importFiles,
+		StorageOperationController    controller
+	);
+
+	public StorageRequestTaskImportDataBinary createImportFromBinaryTask(
+		int                           channelCount          ,
+		StorageDataFileEvaluator      fileEvaluator         ,
+		StorageObjectIdRangeEvaluator objectIdRangeEvaluator,
+		Binary                        importData            ,
 		StorageOperationController    controller
 	);
 
@@ -205,8 +213,8 @@ public interface StorageRequestTaskCreator
 		
 		@Override
 		public StorageRequestTaskLoadByTids createLoadTaskByTids(
-			final PersistenceIdSet           loadTids, 
-			final int                        channelCount, 
+			final PersistenceIdSet           loadTids,
+			final int                        channelCount,
 			final StorageOperationController controller
 		)
 		{
@@ -296,7 +304,7 @@ public interface StorageRequestTaskCreator
 		}
 
 		@Override
-		public StorageRequestTaskImportData createImportFromFilesTask(
+		public StorageRequestTaskImportDataFiles createImportFromFilesTask(
 			final int                           channelCount          ,
 			final StorageDataFileEvaluator      fileEvaluator         ,
 			final StorageObjectIdRangeEvaluator objectIdRangeEvaluator,
@@ -304,11 +312,29 @@ public interface StorageRequestTaskCreator
 			final StorageOperationController    controller
 		)
 		{
-			return new StorageRequestTaskImportData.Default(
+			return new StorageRequestTaskImportDataFiles.Default(
 				this.timestampProvider.currentNanoTimestamp(),
 				channelCount,
 				objectIdRangeEvaluator,
 				importFiles,
+				controller
+			);
+		}
+
+		@Override
+		public StorageRequestTaskImportDataBinary createImportFromBinaryTask(
+			final int                           channelCount          ,
+			final StorageDataFileEvaluator      fileEvaluator         ,
+			final StorageObjectIdRangeEvaluator objectIdRangeEvaluator,
+			final Binary                        importData            ,
+			final StorageOperationController    controller
+		)
+		{
+			return new StorageRequestTaskImportDataBinary.Default(
+				this.timestampProvider.currentNanoTimestamp(),
+				channelCount,
+				objectIdRangeEvaluator,
+				importData,
 				controller
 			);
 		}

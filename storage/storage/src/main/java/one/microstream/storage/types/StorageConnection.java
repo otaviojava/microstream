@@ -246,7 +246,7 @@ public interface StorageConnection extends Persister
 				)
 			);
 		}
-		else		
+		else
 		{
 			throw new StorageExceptionBackupFullBackupTargetNotEmpty(targetDirectory);
 		}
@@ -358,6 +358,8 @@ public interface StorageConnection extends Persister
 	 * @param importFiles the files whose native binary content shall be imported.
 	 */
 	public void importFiles(XGettingEnum<AFile> importFiles);
+	
+	public void importData(Binary data);
 
 	/* (13.07.2015 TM)TODO: load by type somehow
 	 * Query by typeId already implemented. Question is how to best provide it to the user.
@@ -595,6 +597,20 @@ public interface StorageConnection extends Persister
 			try
 			{
 				this.connectionRequestAcceptor.importFiles(importFiles);
+			}
+			catch(final InterruptedException e)
+			{
+				// thread interrupted, task aborted, return
+				return;
+			}
+		}
+		
+		@Override
+		public void importData(final Binary data)
+		{
+			try
+			{
+				this.connectionRequestAcceptor.importData(data);
 			}
 			catch(final InterruptedException e)
 			{
